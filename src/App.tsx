@@ -103,6 +103,12 @@ export default function App(): JSX.Element {
     return "text-fg-dimmed";
   };
 
+  const bpsSliderAccent = (bps: number): string => {
+    if (bps < 0) return "accent-positive";
+    if (bps > 0) return "accent-negative";
+    return "accent-fg-dimmed";
+  };
+
   const diffColor = (bps: number): string => {
     if (!Number.isFinite(bps) || Math.abs(bps) <= 15) return "text-fg-muted";
     return bps < 0 ? "text-positive" : "text-negative";
@@ -193,20 +199,29 @@ export default function App(): JSX.Element {
                       className="border-b border-line/50 hover:bg-bg"
                     >
                       <td className="px-3 py-1 text-fg-muted">{m.date}</td>
-                      <td className="px-3 py-1 text-right">
-                        <input
-                          type="number"
-                          step={25}
-                          value={m.cut}
-                          onChange={(e) => {
-                            const v = parseInt(e.target.value, 10);
-                            setCuts((prev) => ({
-                              ...prev,
-                              [m.date]: Number.isNaN(v) ? 0 : v,
-                            }));
-                          }}
-                          className={`bg-transparent text-right w-20 font-bold focus:outline-none ${bpsColor(m.cut)}`}
-                        />
+                      <td className="px-3 py-1">
+                        <div className="flex items-center gap-2 justify-end">
+                          <input
+                            type="range"
+                            min={-500}
+                            max={500}
+                            step={25}
+                            value={m.cut}
+                            onChange={(e) => {
+                              const v = parseInt(e.target.value, 10);
+                              setCuts((prev) => ({
+                                ...prev,
+                                [m.date]: Number.isNaN(v) ? 0 : v,
+                              }));
+                            }}
+                            className={`flex-1 min-w-0 h-1 cursor-pointer bps-slider ${bpsSliderAccent(m.cut)} ${bpsColor(m.cut)}`}
+                          />
+                          <span
+                            className={`font-bold tabular-nums w-12 text-right ${bpsColor(m.cut)}`}
+                          >
+                            {m.cut > 0 ? `+${m.cut}` : m.cut}
+                          </span>
+                        </div>
                       </td>
                       <td className="px-3 py-1 text-right text-value">
                         {fwd.toFixed(2)}
