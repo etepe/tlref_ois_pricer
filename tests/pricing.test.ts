@@ -164,3 +164,50 @@ describe("computeParRate — error path", () => {
     expect(res.periods).toBe(0);
   });
 });
+
+describe("computeParRate — Modified-Following start-date adjustment", () => {
+  // Regression: a non-biz `valueDate` (e.g. UI's `todayIso()` on a
+  // Saturday) used to leak accrual because the DF walk's first fixing
+  // only fired on Mon, so the pre-biz-day gap went un-compounded and
+  // short tenors priced ~Σ·7/9 instead of the right rate. The start
+  // should now be MF-adjusted to match the maturity treatment.
+  const SAT_START = "2026-04-11"; // Saturday
+  const MON_START = "2026-04-13"; // next biz day (MF target)
+
+  it("Sat start gives the same fair rate as the MF-adjusted Mon start", () => {
+    // Same meetings, same spot, same maturity — the two calls must agree.
+    const meetings: Meeting[] = [{ date: "2026-04-23", cut: -100 }];
+
+    for (const mat of ["2026-04-20", "2026-05-13", "2026-07-13", "2027-04-13"]) {
+      const fromSat = computeParRate(SAT_START, mat, meetings, 39.99);
+      const fromMon = computeParRate(MON_START, mat, meetings, 39.99);
+      expect(fromSat.method).toBe(fromMon.method);
+      expect(fromSat.calDays).toBe(fromMon.calDays);
+      expect(fromSat.adjMat).toBe(fromMon.adjMat);
+      expect(fromSat.fairRate).toBeCloseTo(fromMon.fairRate, 10);
+    }
+  });
+
+  it("1W from Sat start prices near the flat-rate level (pre-meeting)", () => {
+    // Mat 2026-04-20 (Mon) is *before* the 2026-04-23 meeting, so the
+    // cut must not apply at all. With spot=39.99 flat, the 7-day ZC
+    // rate equals 39.99 plus a tiny compounding convexity (<15 bps).
+    const res = computeParRate(
+      SAT_START,
+      "2026-04-20",
+      [{ date: "2026-04-23", cut: -100 }],
+      39.99,
+    );
+    expect(res.method).toBe("ZC");
+    expect(res.calDays).toBe(7); // 04-13 Mon → 04-20 Mon (post-adjust)
+    expect(res.fairRate).toBeGreaterThan(39.99);
+    expect(res.fairRate).toBeLessThan(40.15);
+  });
+
+  it("Sun start also adjusts forward to Mon (symmetric with Sat)", () => {
+    const sun = computeParRate("2026-04-12", "2026-04-20", [], 40);
+    const mon = computeParRate("2026-04-13", "2026-04-20", [], 40);
+    expect(sun.fairRate).toBeCloseTo(mon.fairRate, 10);
+    expect(sun.calDays).toBe(mon.calDays);
+  });
+});

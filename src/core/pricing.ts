@@ -145,10 +145,19 @@ export function getDF(dfMap: Map<string, number>, target: Date): number {
  *   - calDays ≤ 95 → single-period zero-coupon formula
  *   - calDays > 95 → quarterly par-swap formula
  *
- * The maturity is Modified-Following adjusted first, so `calDays` and
- * `DF(T)` always refer to the same date. The PAR annuity is anchored at
- * the unadjusted start date (not the first coupon) so that the first
- * period's DCF is measured from trade start.
+ * Both `startDate` and `maturityDate` are Modified-Following adjusted
+ * first, so `calDays`, `DF(T)`, and the coupon schedule all refer to
+ * business days. Adjusting the start is defensive: when the UI passes
+ * a weekend/holiday `valueDate` (e.g. `todayIso()` on a Saturday) the
+ * DF walk would otherwise lose accrual over the pre-biz-day gap — the
+ * first fixing only fires on the next business day, so Σ(r·gᵢ/365) no
+ * longer tiles [start, mat). Rolling the start forward to the first
+ * business day matches TLREF OIS market convention (trade and value
+ * dates are biz days) and makes the pricer robust against non-biz
+ * inputs.
+ *
+ * The PAR annuity is anchored at the (adjusted) start date so that
+ * the first period's DCF is measured from trade start.
  *
  * Returns `method: 'ERR'` with `NaN` rate on any failure (bad maturity,
  * DF lookup miss, etc.) — the UI surfaces this as an error state.
@@ -160,7 +169,8 @@ export function computeParRate(
   startTlref: number,
 ): PricingResult {
   try {
-    const startD = parseIso(startDate);
+    const startD = modifiedFollowing(parseIso(startDate));
+    const startStr = toKey(startD);
     const adjMat = modifiedFollowing(parseIso(maturityDate));
     const adjMatStr = toKey(adjMat);
     const calDays = daysBetween(startD, adjMat);
@@ -169,7 +179,7 @@ export function computeParRate(
       return { fairRate: NaN, calDays, method: "ERR", periods: 0, adjMat: adjMatStr };
     }
 
-    const dfMap = buildDailyDF(startDate, adjMat, meetings, startTlref);
+    const dfMap = buildDailyDF(startStr, adjMat, meetings, startTlref);
     const dfT = getDF(dfMap, adjMat);
 
     if (calDays <= 95) {
