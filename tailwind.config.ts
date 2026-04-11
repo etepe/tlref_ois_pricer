@@ -6,24 +6,41 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        // Bloomberg-terminal style dark palette (placeholder, refined later)
+        // Bloomberg-terminal style dark palette
         bg: {
-          DEFAULT: "#0b0d10",
-          raised: "#11141a",
-          sunken: "#070809",
+          DEFAULT: "#0a0e17",
+          panel: "#111827",
         },
-        accent: {
-          amber: "#ffb000",
-          green: "#00d26a",
-          red: "#ff4d4f",
+        line: {
+          DEFAULT: "#1e2736",
         },
         fg: {
-          DEFAULT: "#e6e8ec",
-          muted: "#8a93a3",
+          DEFAULT: "#c8ccd4",
+          muted: "#6b7280",
+          dimmed: "#374151",
+        },
+        accent: {
+          DEFAULT: "#ff8c00",
+        },
+        value: {
+          DEFAULT: "#f59e0b",
+        },
+        positive: {
+          DEFAULT: "#10b981",
+        },
+        negative: {
+          DEFAULT: "#ef4444",
         },
       },
       fontFamily: {
-        mono: ["ui-monospace", "SFMono-Regular", "Menlo", "monospace"],
+        mono: [
+          '"JetBrains Mono"',
+          "Consolas",
+          "ui-monospace",
+          "SFMono-Regular",
+          "Menlo",
+          "monospace",
+        ],
       },
     },
   },
