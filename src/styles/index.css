@@ -29,3 +29,33 @@ input[type="number"]::-webkit-inner-spin-button {
 input[type="number"] {
   -moz-appearance: textfield;
 }
+
+/* BPS slider (TCMB meeting change column) */
+input[type="range"].bps-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  background: #1e2736;
+  border-radius: 9999px;
+  height: 4px;
+}
+input[type="range"].bps-slider:focus {
+  outline: none;
+}
+input[type="range"].bps-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 12px;
+  height: 12px;
+  border-radius: 9999px;
+  background: currentColor;
+  cursor: pointer;
+  border: none;
+}
+input[type="range"].bps-slider::-moz-range-thumb {
+  width: 12px;
+  height: 12px;
+  border-radius: 9999px;
+  background: currentColor;
+  cursor: pointer;
+  border: none;
+}
