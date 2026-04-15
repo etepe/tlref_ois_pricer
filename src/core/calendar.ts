@@ -1,114 +1,114 @@
 /**
- * Istanbul business-day calendar utilities for the TLREF OIS pricer.
+ * Istanbul business-day calendar utilities.
  *
- * All dates are interpreted as UTC calendar dates — time-of-day is ignored
- * and inputs are normalized to midnight UTC before any arithmetic, so that
- * local timezone / DST transitions cannot cause off-by-one errors in day
- * counts, which matter for interest accrual.
+ * All dates are handled as UTC-normalized midnights so local timezone
+ * transitions cannot shift day counts — interest accrual is sensitive
+ * to off-by-one errors. Ported from ois_pricer/engine_v2/calendar.py
+ * plus data_provider.py helpers (is_business_day, add_bdays, next_bday).
  */
 
 import { HOLIDAY_SET } from "../data/holidays";
 
 const MS_PER_DAY = 86_400_000;
 
-// --- Internal helpers -------------------------------------------------------
+// --- Date utilities ---------------------------------------------------------
 
 function pad2(n: number): string {
   return n < 10 ? `0${n}` : `${n}`;
 }
 
-/** Normalize a Date to midnight UTC on its Y/M/D in UTC. */
-function toUtcMidnight(d: Date): Date {
+/** Return a UTC-midnight copy of `d`. */
+export function toUtcMidnight(d: Date): Date {
   return new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()));
 }
 
-/** ISO `YYYY-MM-DD` key derived from the date's UTC components. */
-function toKey(d: Date): string {
+/** ISO `YYYY-MM-DD` key using the date's UTC components. */
+export function toIso(d: Date): string {
   return `${d.getUTCFullYear()}-${pad2(d.getUTCMonth() + 1)}-${pad2(d.getUTCDate())}`;
 }
 
-/** Return a new Date `n` days after `d` (UTC-normalized). */
-function addDays(d: Date, n: number): Date {
+/** Parse an ISO `YYYY-MM-DD` string into a UTC-midnight Date. */
+export function parseIso(s: string): Date {
+  const [y, m, d] = s.split("-").map(Number) as [number, number, number];
+  return new Date(Date.UTC(y, m - 1, d));
+}
+
+/** Return a Date `n` calendar days after `d` (UTC-safe). */
+export function addDays(d: Date, n: number): Date {
   return new Date(toUtcMidnight(d).getTime() + n * MS_PER_DAY);
 }
 
-// --- Public API -------------------------------------------------------------
-
 /**
- * True iff `d` is an Istanbul business day — i.e. not a weekend and not
- * a Turkish public holiday listed in {@link HOLIDAY_SET}.
+ * Add `n` months to `d`, clamping to the last valid day of the target
+ * month. Mirrors the `calendar.monthrange` trick in ois_pricer's
+ * engine.py so `Jan 31 + 1M = Feb 28/29`, not `Mar 3`.
  */
-export function isBizDay(d: Date): boolean {
-  const u = toUtcMidnight(d);
-  const dow = u.getUTCDay(); // 0 = Sunday, 6 = Saturday
-  if (dow === 0 || dow === 6) return false;
-  return !HOLIDAY_SET.has(toKey(u));
+export function addMonths(d: Date, n: number): Date {
+  const y = d.getUTCFullYear();
+  const m = d.getUTCMonth() + n;
+  const day = d.getUTCDate();
+  const lastDay = new Date(Date.UTC(y, m + 1, 0)).getUTCDate();
+  return new Date(Date.UTC(y, m, Math.min(day, lastDay)));
 }
 
-/**
- * Modified Following business-day convention:
- *   - Roll forward day-by-day until a business day is found.
- *   - If that roll crosses into the next calendar month, roll backward
- *     from the original date instead.
- */
-export function modifiedFollowing(d: Date): Date {
-  const start = toUtcMidnight(d);
-  if (isBizDay(start)) return start;
-
-  // Forward scan
-  let fwd = start;
-  for (let i = 0; i < 10; i++) {
-    fwd = addDays(fwd, 1);
-    if (isBizDay(fwd)) break;
-  }
-
-  if (fwd.getUTCMonth() === start.getUTCMonth()) {
-    return fwd;
-  }
-
-  // Crossed month boundary — backward scan from the original date.
-  let back = start;
-  for (let i = 0; i < 10; i++) {
-    back = addDays(back, -1);
-    if (isBizDay(back)) return back;
-  }
-  // Fallback (should never hit in practice): return the forward result.
-  return fwd;
-}
-
-/**
- * Whole-day distance `b - a` using UTC-normalized midnights.
- * Result can be negative if `b` is before `a`.
- */
+/** Whole-day distance `b - a` using UTC-normalized midnights. */
 export function daysBetween(a: Date, b: Date): number {
   const ua = toUtcMidnight(a).getTime();
   const ub = toUtcMidnight(b).getTime();
   return Math.round((ub - ua) / MS_PER_DAY);
 }
 
+// --- Business-day predicates ------------------------------------------------
+
 /**
- * G-factor (number of calendar days a TLREF fixing applies for),
- * capped so it cannot run past the swap maturity.
- *
- *   g = max(1, min(nextBizDay(d) - d, maturity - d))
- *
- * Examples:
- *   - Friday → next biz day is Monday ⇒ g = 3
- *   - Friday where maturity is Saturday ⇒ g = 1 (maturity cap)
+ * True iff `d` is an Istanbul business day — not a weekend and not a
+ * Turkish public holiday listed in {@link HOLIDAY_SET}.
  */
-export function gFactorCapped(d: Date, maturity: Date): number {
-  const start = toUtcMidnight(d);
-  const mat = toUtcMidnight(maturity);
+export function isBusinessDay(d: Date): boolean {
+  const u = toUtcMidnight(d);
+  const dow = u.getUTCDay(); // 0 = Sun, 6 = Sat
+  if (dow === 0 || dow === 6) return false;
+  return !HOLIDAY_SET.has(toIso(u));
+}
 
-  // Next business day strictly after `d` (plain forward scan, no month
-  // rollback — this is an accrual horizon, not a settlement roll).
-  let next = start;
-  for (let i = 0; i < 30; i++) {
-    next = addDays(next, 1);
-    if (isBizDay(next)) break;
+/**
+ * First business day ≥ `d`. Matches `next_bday` in
+ * ois_pricer/data_provider.py: if `d` is already a BD, return it.
+ */
+export function nextBusinessDay(d: Date): Date {
+  let cur = toUtcMidnight(d);
+  while (!isBusinessDay(cur)) cur = addDays(cur, 1);
+  return cur;
+}
+
+/**
+ * Add `n` business days to `d` (strictly forward). Mirrors
+ * `add_bdays` in ois_pricer: walks day-by-day, counts BDs,
+ * stops when count == n. `addBusinessDays(d, 0)` returns `d`.
+ */
+export function addBusinessDays(d: Date, n: number): Date {
+  let cur = toUtcMidnight(d);
+  let count = 0;
+  while (count < n) {
+    cur = addDays(cur, 1);
+    if (isBusinessDay(cur)) count++;
   }
+  return cur;
+}
 
-  const toNext = daysBetween(start, next);
-  const toMat = daysBetween(start, mat);
-  return Math.max(1, Math.min(toNext, toMat));
+/**
+ * Modified Following convention, matching engine_v2/calendar.py:
+ *   - Roll forward to the first BD.
+ *   - If that roll lands in a different calendar month, roll backward
+ *     from the original date instead.
+ */
+export function modifiedFollowing(d: Date): Date {
+  const original = toUtcMidnight(d);
+  let fwd = original;
+  while (!isBusinessDay(fwd)) fwd = addDays(fwd, 1);
+  if (fwd.getUTCMonth() === original.getUTCMonth()) return fwd;
+
+  let back = original;
+  while (!isBusinessDay(back)) back = addDays(back, -1);
+  return back;
 }

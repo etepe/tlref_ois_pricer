@@ -1,11 +1,33 @@
 <!doctype html>
-<html lang="en" class="dark">
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>TLREF OIS Pricer</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap"
+    />
+    <style>
+      * { box-sizing: border-box; }
+      html, body, #root { height: 100%; margin: 0; padding: 0; }
+      body {
+        background: #060A14;
+        color: #E6EDF3;
+        font-family: "DM Sans", "Segoe UI", system-ui, sans-serif;
+        font-size: 13px;
+        -webkit-font-smoothing: antialiased;
+      }
+      input[type="number"], input[type="date"] { font-family: inherit; }
+      input::-webkit-outer-spin-button,
+      input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+      input[type="number"] { -moz-appearance: textfield; }
+      button { font-family: inherit; }
+    </style>
   </head>
-  <body class="bg-bg text-fg font-mono">
+  <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
