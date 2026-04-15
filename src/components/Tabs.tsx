@@ -5,13 +5,11 @@
 import type { JSX } from "react";
 import { C } from "./theme";
 
-export type TabId = "bonds" | "curves" | "ppk" | "data";
+export type TabId = "bonds" | "market";
 
 export const TAB_LABELS: ReadonlyArray<[TabId, string]> = [
   ["bonds", "Bonds"],
-  ["curves", "Curves & Basis"],
-  ["ppk", "Implied PPK"],
-  ["data", "Market Data"],
+  ["market", "Market"],
 ];
 
 interface Props {

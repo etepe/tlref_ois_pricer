@@ -21,10 +21,8 @@ import { DEFAULT_OIS_QUOTES } from "../data/ois-quotes";
 import { DEFAULT_OFFSHORE_QUOTES } from "../data/offshore-quotes";
 import { CBRT_MEETING_DATES, DEFAULT_TRADE_DATE } from "../data/ppk-dates";
 import { BondsTab } from "./BondsTab";
-import { CurvesTab } from "./CurvesTab";
 import { Header } from "./Header";
-import { MarketDataTab } from "./MarketDataTab";
-import { PpkTab } from "./PpkTab";
+import { MarketTab } from "./MarketTab";
 import { C } from "./theme";
 import { Tabs, type TabId } from "./Tabs";
 
@@ -120,17 +118,15 @@ export default function App(): JSX.Element {
             offNodes={offNodes}
           />
         )}
-        {activeTab === "curves" && (
-          <CurvesTab oisNodes={oisNodes} offNodes={offNodes} />
-        )}
-        {activeTab === "ppk" && (
-          <PpkTab implied={implied} spotTlref={SPOT_TLREF_DEFAULT} />
-        )}
-        {activeTab === "data" && (
-          <MarketDataTab
+        {activeTab === "market" && (
+          <MarketTab
             oisQuotes={oisQuotes}
             offQuotes={offQuotes}
+            oisNodes={oisNodes}
+            offNodes={offNodes}
+            implied={implied}
             side={side}
+            spotTlref={SPOT_TLREF_DEFAULT}
             onOisChange={handleOisChange}
             onOffChange={handleOffChange}
           />
