@@ -34,9 +34,7 @@ src/
 │   ├── Header.tsx        Trade/VD readout + bid/mid/ask toggle
 │   ├── Tabs.tsx
 │   ├── BondsTab.tsx
-│   ├── CurvesTab.tsx
-│   ├── PpkTab.tsx        Implied + Scenario sub-tabs
-│   ├── MarketDataTab.tsx
+│   ├── RatesTab.tsx      Market Data + Curves & Basis + Implied PPK
 │   ├── Chart.tsx         Minimal SVG chart primitive
 │   └── theme.ts          Color palette
 └── main.tsx
@@ -64,6 +62,12 @@ bloomberg/
   `holidays` package, dumped to `src/data/holidays.ts` (2020-2035).
 
 ## Usage
+
+Easiest: double-click **`run.bat`** (Windows) or run **`./run.sh`**
+(macOS/Linux). The script installs dependencies on first run, starts
+the Vite dev server, and opens the app in Chrome.
+
+Manual:
 
 ```bash
 npm install
