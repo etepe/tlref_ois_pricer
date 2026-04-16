@@ -1,127 +1,238 @@
 /**
- * Turkish public holidays 2026–2036.
+ * Turkish public holidays 2020-2035.
  *
- * - Fixed-date holidays repeat every year (Yılbaşı, Ulusal Egemenlik,
- *   İşçi Bayramı, Gençlik Bayramı, Demokrasi, Zafer, Cumhuriyet).
- * - Ramazan Bayramı and Kurban Bayramı are Hijri-calendar based and
- *   hard-coded per year using the TR-government published schedule.
- *   The "arife" (half-day before the religious bayram) is modeled as
- *   a FULL non-business day per product decision — this matches how
- *   TR banks typically close their books.
+ * Source: Python `holidays` package (Turkey calendar), dumped from
+ * ois_pricer/data/tr_holidays.json. Dates are ISO YYYY-MM-DD.
  *
- * Dates are ISO `YYYY-MM-DD` strings interpreted as calendar dates
- * (no timezone — the calendar module treats everything as UTC).
- *
- * Exported:
- *   - `TURKISH_HOLIDAYS` — the full ordered list with human-readable names
- *   - `HOLIDAY_SET`      — memoized Set<string> for O(1) `has` lookup
+ * Used by src/core/calendar.ts to determine Istanbul business days.
  */
 
-export interface Holiday {
-  readonly date: string; // YYYY-MM-DD
-  readonly name: string;
-}
-
-// --- Fixed-date holidays -----------------------------------------------------
-
-const FIXED_HOLIDAYS: ReadonlyArray<{ mmdd: string; name: string }> = [
-  { mmdd: "01-01", name: "Yılbaşı" },
-  { mmdd: "04-23", name: "Ulusal Egemenlik ve Çocuk Bayramı" },
-  { mmdd: "05-01", name: "Emek ve Dayanışma Günü" },
-  { mmdd: "05-19", name: "Atatürk'ü Anma, Gençlik ve Spor Bayramı" },
-  { mmdd: "07-15", name: "Demokrasi ve Milli Birlik Günü" },
-  { mmdd: "08-30", name: "Zafer Bayramı" },
-  { mmdd: "10-29", name: "Cumhuriyet Bayramı" },
+export const TR_HOLIDAYS: readonly string[] = [
+  "2020-01-01",  // Yılbaşı
+  "2020-04-23",  // Ulusal Egemenlik ve Çocuk Bayramı
+  "2020-05-01",  // Emek ve Dayanışma Günü
+  "2020-05-19",  // Atatürk'ü Anma, Gençlik ve Spor Bayramı
+  "2020-05-24",  // Ramazan Bayramı
+  "2020-05-25",  // Ramazan Bayramı
+  "2020-05-26",  // Ramazan Bayramı
+  "2020-07-15",  // Demokrasi ve Millî Birlik Günü
+  "2020-07-31",  // Kurban Bayramı
+  "2020-08-01",  // Kurban Bayramı
+  "2020-08-02",  // Kurban Bayramı
+  "2020-08-03",  // Kurban Bayramı
+  "2020-08-30",  // Zafer Bayramı
+  "2020-10-29",  // Cumhuriyet Bayramı
+  "2021-01-01",  // Yılbaşı
+  "2021-04-23",  // Ulusal Egemenlik ve Çocuk Bayramı
+  "2021-05-01",  // Emek ve Dayanışma Günü
+  "2021-05-13",  // Ramazan Bayramı
+  "2021-05-14",  // Ramazan Bayramı
+  "2021-05-15",  // Ramazan Bayramı
+  "2021-05-19",  // Atatürk'ü Anma, Gençlik ve Spor Bayramı
+  "2021-07-15",  // Demokrasi ve Millî Birlik Günü
+  "2021-07-20",  // Kurban Bayramı
+  "2021-07-21",  // Kurban Bayramı
+  "2021-07-22",  // Kurban Bayramı
+  "2021-07-23",  // Kurban Bayramı
+  "2021-08-30",  // Zafer Bayramı
+  "2021-10-29",  // Cumhuriyet Bayramı
+  "2022-01-01",  // Yılbaşı
+  "2022-04-23",  // Ulusal Egemenlik ve Çocuk Bayramı
+  "2022-05-01",  // Emek ve Dayanışma Günü
+  "2022-05-02",  // Ramazan Bayramı
+  "2022-05-03",  // Ramazan Bayramı
+  "2022-05-04",  // Ramazan Bayramı
+  "2022-05-19",  // Atatürk'ü Anma, Gençlik ve Spor Bayramı
+  "2022-07-09",  // Kurban Bayramı
+  "2022-07-10",  // Kurban Bayramı
+  "2022-07-11",  // Kurban Bayramı
+  "2022-07-12",  // Kurban Bayramı
+  "2022-07-15",  // Demokrasi ve Millî Birlik Günü
+  "2022-08-30",  // Zafer Bayramı
+  "2022-10-29",  // Cumhuriyet Bayramı
+  "2023-01-01",  // Yılbaşı
+  "2023-04-21",  // Ramazan Bayramı
+  "2023-04-22",  // Ramazan Bayramı
+  "2023-04-23",  // Ramazan Bayramı; Ulusal Egemenlik ve Çocuk Bayramı
+  "2023-05-01",  // Emek ve Dayanışma Günü
+  "2023-05-19",  // Atatürk'ü Anma, Gençlik ve Spor Bayramı
+  "2023-06-28",  // Kurban Bayramı
+  "2023-06-29",  // Kurban Bayramı
+  "2023-06-30",  // Kurban Bayramı
+  "2023-07-01",  // Kurban Bayramı
+  "2023-07-15",  // Demokrasi ve Millî Birlik Günü
+  "2023-08-30",  // Zafer Bayramı
+  "2023-10-29",  // Cumhuriyet Bayramı
+  "2024-01-01",  // Yılbaşı
+  "2024-04-10",  // Ramazan Bayramı
+  "2024-04-11",  // Ramazan Bayramı
+  "2024-04-12",  // Ramazan Bayramı
+  "2024-04-23",  // Ulusal Egemenlik ve Çocuk Bayramı
+  "2024-05-01",  // Emek ve Dayanışma Günü
+  "2024-05-19",  // Atatürk'ü Anma, Gençlik ve Spor Bayramı
+  "2024-06-16",  // Kurban Bayramı
+  "2024-06-17",  // Kurban Bayramı
+  "2024-06-18",  // Kurban Bayramı
+  "2024-06-19",  // Kurban Bayramı
+  "2024-07-15",  // Demokrasi ve Millî Birlik Günü
+  "2024-08-30",  // Zafer Bayramı
+  "2024-10-29",  // Cumhuriyet Bayramı
+  "2025-01-01",  // Yılbaşı
+  "2025-03-30",  // Ramazan Bayramı
+  "2025-03-31",  // Ramazan Bayramı
+  "2025-04-01",  // Ramazan Bayramı
+  "2025-04-23",  // Ulusal Egemenlik ve Çocuk Bayramı
+  "2025-05-01",  // Emek ve Dayanışma Günü
+  "2025-05-19",  // Atatürk'ü Anma, Gençlik ve Spor Bayramı
+  "2025-06-06",  // Kurban Bayramı
+  "2025-06-07",  // Kurban Bayramı
+  "2025-06-08",  // Kurban Bayramı
+  "2025-06-09",  // Kurban Bayramı
+  "2025-07-15",  // Demokrasi ve Millî Birlik Günü
+  "2025-08-30",  // Zafer Bayramı
+  "2025-10-29",  // Cumhuriyet Bayramı
+  "2026-01-01",  // Yılbaşı
+  "2026-03-20",  // Ramazan Bayramı
+  "2026-03-21",  // Ramazan Bayramı
+  "2026-03-22",  // Ramazan Bayramı
+  "2026-04-23",  // Ulusal Egemenlik ve Çocuk Bayramı
+  "2026-05-01",  // Emek ve Dayanışma Günü
+  "2026-05-19",  // Atatürk'ü Anma, Gençlik ve Spor Bayramı
+  "2026-05-27",  // Kurban Bayramı
+  "2026-05-28",  // Kurban Bayramı
+  "2026-05-29",  // Kurban Bayramı
+  "2026-05-30",  // Kurban Bayramı
+  "2026-07-15",  // Demokrasi ve Millî Birlik Günü
+  "2026-08-30",  // Zafer Bayramı
+  "2026-10-29",  // Cumhuriyet Bayramı
+  "2027-01-01",  // Yılbaşı
+  "2027-03-09",  // Ramazan Bayramı
+  "2027-03-10",  // Ramazan Bayramı
+  "2027-03-11",  // Ramazan Bayramı
+  "2027-04-23",  // Ulusal Egemenlik ve Çocuk Bayramı
+  "2027-05-01",  // Emek ve Dayanışma Günü
+  "2027-05-16",  // Kurban Bayramı
+  "2027-05-17",  // Kurban Bayramı
+  "2027-05-18",  // Kurban Bayramı
+  "2027-05-19",  // Atatürk'ü Anma, Gençlik ve Spor Bayramı; Kurban Bayramı
+  "2027-07-15",  // Demokrasi ve Millî Birlik Günü
+  "2027-08-30",  // Zafer Bayramı
+  "2027-10-29",  // Cumhuriyet Bayramı
+  "2028-01-01",  // Yılbaşı
+  "2028-02-26",  // Ramazan Bayramı
+  "2028-02-27",  // Ramazan Bayramı
+  "2028-02-28",  // Ramazan Bayramı
+  "2028-04-23",  // Ulusal Egemenlik ve Çocuk Bayramı
+  "2028-05-01",  // Emek ve Dayanışma Günü
+  "2028-05-05",  // Kurban Bayramı
+  "2028-05-06",  // Kurban Bayramı
+  "2028-05-07",  // Kurban Bayramı
+  "2028-05-08",  // Kurban Bayramı
+  "2028-05-19",  // Atatürk'ü Anma, Gençlik ve Spor Bayramı
+  "2028-07-15",  // Demokrasi ve Millî Birlik Günü
+  "2028-08-30",  // Zafer Bayramı
+  "2028-10-29",  // Cumhuriyet Bayramı
+  "2029-01-01",  // Yılbaşı
+  "2029-02-14",  // Ramazan Bayramı
+  "2029-02-15",  // Ramazan Bayramı
+  "2029-02-16",  // Ramazan Bayramı
+  "2029-04-23",  // Ulusal Egemenlik ve Çocuk Bayramı
+  "2029-04-24",  // Kurban Bayramı
+  "2029-04-25",  // Kurban Bayramı
+  "2029-04-26",  // Kurban Bayramı
+  "2029-04-27",  // Kurban Bayramı
+  "2029-05-01",  // Emek ve Dayanışma Günü
+  "2029-05-19",  // Atatürk'ü Anma, Gençlik ve Spor Bayramı
+  "2029-07-15",  // Demokrasi ve Millî Birlik Günü
+  "2029-08-30",  // Zafer Bayramı
+  "2029-10-29",  // Cumhuriyet Bayramı
+  "2030-01-01",  // Yılbaşı
+  "2030-02-04",  // Ramazan Bayramı
+  "2030-02-05",  // Ramazan Bayramı
+  "2030-02-06",  // Ramazan Bayramı
+  "2030-04-13",  // Kurban Bayramı
+  "2030-04-14",  // Kurban Bayramı
+  "2030-04-15",  // Kurban Bayramı
+  "2030-04-16",  // Kurban Bayramı
+  "2030-04-23",  // Ulusal Egemenlik ve Çocuk Bayramı
+  "2030-05-01",  // Emek ve Dayanışma Günü
+  "2030-05-19",  // Atatürk'ü Anma, Gençlik ve Spor Bayramı
+  "2030-07-15",  // Demokrasi ve Millî Birlik Günü
+  "2030-08-30",  // Zafer Bayramı
+  "2030-10-29",  // Cumhuriyet Bayramı
+  "2031-01-01",  // Yılbaşı
+  "2031-01-24",  // Ramazan Bayramı
+  "2031-01-25",  // Ramazan Bayramı
+  "2031-01-26",  // Ramazan Bayramı
+  "2031-04-02",  // Kurban Bayramı
+  "2031-04-03",  // Kurban Bayramı
+  "2031-04-04",  // Kurban Bayramı
+  "2031-04-05",  // Kurban Bayramı
+  "2031-04-23",  // Ulusal Egemenlik ve Çocuk Bayramı
+  "2031-05-01",  // Emek ve Dayanışma Günü
+  "2031-05-19",  // Atatürk'ü Anma, Gençlik ve Spor Bayramı
+  "2031-07-15",  // Demokrasi ve Millî Birlik Günü
+  "2031-08-30",  // Zafer Bayramı
+  "2031-10-29",  // Cumhuriyet Bayramı
+  "2032-01-01",  // Yılbaşı
+  "2032-01-14",  // Ramazan Bayramı
+  "2032-01-15",  // Ramazan Bayramı
+  "2032-01-16",  // Ramazan Bayramı
+  "2032-03-22",  // Kurban Bayramı
+  "2032-03-23",  // Kurban Bayramı
+  "2032-03-24",  // Kurban Bayramı
+  "2032-03-25",  // Kurban Bayramı
+  "2032-04-23",  // Ulusal Egemenlik ve Çocuk Bayramı
+  "2032-05-01",  // Emek ve Dayanışma Günü
+  "2032-05-19",  // Atatürk'ü Anma, Gençlik ve Spor Bayramı
+  "2032-07-15",  // Demokrasi ve Millî Birlik Günü
+  "2032-08-30",  // Zafer Bayramı
+  "2032-10-29",  // Cumhuriyet Bayramı
+  "2033-01-01",  // Yılbaşı
+  "2033-01-02",  // Ramazan Bayramı (tahmini)
+  "2033-01-03",  // Ramazan Bayramı (tahmini)
+  "2033-01-04",  // Ramazan Bayramı (tahmini)
+  "2033-03-11",  // Kurban Bayramı (tahmini)
+  "2033-03-12",  // Kurban Bayramı (tahmini)
+  "2033-03-13",  // Kurban Bayramı (tahmini)
+  "2033-03-14",  // Kurban Bayramı (tahmini)
+  "2033-04-23",  // Ulusal Egemenlik ve Çocuk Bayramı
+  "2033-05-01",  // Emek ve Dayanışma Günü
+  "2033-05-19",  // Atatürk'ü Anma, Gençlik ve Spor Bayramı
+  "2033-07-15",  // Demokrasi ve Millî Birlik Günü
+  "2033-08-30",  // Zafer Bayramı
+  "2033-10-29",  // Cumhuriyet Bayramı
+  "2033-12-23",  // Ramazan Bayramı (tahmini)
+  "2033-12-24",  // Ramazan Bayramı (tahmini)
+  "2033-12-25",  // Ramazan Bayramı (tahmini)
+  "2034-01-01",  // Yılbaşı
+  "2034-03-01",  // Kurban Bayramı (tahmini)
+  "2034-03-02",  // Kurban Bayramı (tahmini)
+  "2034-03-03",  // Kurban Bayramı (tahmini)
+  "2034-03-04",  // Kurban Bayramı (tahmini)
+  "2034-04-23",  // Ulusal Egemenlik ve Çocuk Bayramı
+  "2034-05-01",  // Emek ve Dayanışma Günü
+  "2034-05-19",  // Atatürk'ü Anma, Gençlik ve Spor Bayramı
+  "2034-07-15",  // Demokrasi ve Millî Birlik Günü
+  "2034-08-30",  // Zafer Bayramı
+  "2034-10-29",  // Cumhuriyet Bayramı
+  "2034-12-12",  // Ramazan Bayramı (tahmini)
+  "2034-12-13",  // Ramazan Bayramı (tahmini)
+  "2034-12-14",  // Ramazan Bayramı (tahmini)
+  "2035-01-01",  // Yılbaşı
+  "2035-02-18",  // Kurban Bayramı (tahmini)
+  "2035-02-19",  // Kurban Bayramı (tahmini)
+  "2035-02-20",  // Kurban Bayramı (tahmini)
+  "2035-02-21",  // Kurban Bayramı (tahmini)
+  "2035-04-23",  // Ulusal Egemenlik ve Çocuk Bayramı
+  "2035-05-01",  // Emek ve Dayanışma Günü
+  "2035-05-19",  // Atatürk'ü Anma, Gençlik ve Spor Bayramı
+  "2035-07-15",  // Demokrasi ve Millî Birlik Günü
+  "2035-08-30",  // Zafer Bayramı
+  "2035-10-29",  // Cumhuriyet Bayramı
+  "2035-12-01",  // Ramazan Bayramı (tahmini)
+  "2035-12-02",  // Ramazan Bayramı (tahmini)
+  "2035-12-03",  // Ramazan Bayramı (tahmini)
 ];
 
-const YEARS: ReadonlyArray<number> = [
-  2026, 2027, 2028, 2029, 2030, 2031, 2032, 2033, 2034, 2035, 2036,
-];
-
-// --- Hijri-based holidays (TR-gov published, arife included as full day) ----
-//
-// Each entry is [startDate, lastDate] inclusive. Arife is `startDate`.
-// Ramazan Bayramı: 4 days (1 arife + 3 full). Kurban Bayramı: 5 days (1 arife + 4 full).
-
-interface HijriRange {
-  readonly start: string;
-  readonly end: string;
-  readonly name: string;
-}
-
-const HIJRI_HOLIDAYS: ReadonlyArray<HijriRange> = [
-  // 2026
-  { start: "2026-03-19", end: "2026-03-22", name: "Ramazan Bayramı" },
-  { start: "2026-05-26", end: "2026-05-30", name: "Kurban Bayramı" },
-  // 2027
-  { start: "2027-03-09", end: "2027-03-12", name: "Ramazan Bayramı" },
-  { start: "2027-05-16", end: "2027-05-20", name: "Kurban Bayramı" },
-  // 2028
-  { start: "2028-02-26", end: "2028-02-29", name: "Ramazan Bayramı" },
-  { start: "2028-05-04", end: "2028-05-08", name: "Kurban Bayramı" },
-  // 2029
-  { start: "2029-02-14", end: "2029-02-17", name: "Ramazan Bayramı" },
-  { start: "2029-04-23", end: "2029-04-27", name: "Kurban Bayramı" }, // 04-23 overlaps Ulusal Egemenlik; Set dedupes
-  // 2030
-  { start: "2030-02-04", end: "2030-02-07", name: "Ramazan Bayramı" },
-  { start: "2030-04-13", end: "2030-04-17", name: "Kurban Bayramı" },
-  // 2031
-  { start: "2031-01-24", end: "2031-01-27", name: "Ramazan Bayramı" },
-  { start: "2031-04-02", end: "2031-04-06", name: "Kurban Bayramı" },
-  // 2032
-  { start: "2032-01-13", end: "2032-01-16", name: "Ramazan Bayramı" },
-  { start: "2032-03-21", end: "2032-03-25", name: "Kurban Bayramı" },
-  // 2033 — two Ramazan Bayramı occurrences (early Jan + late Dec)
-  { start: "2033-01-02", end: "2033-01-05", name: "Ramazan Bayramı" },
-  { start: "2033-03-10", end: "2033-03-14", name: "Kurban Bayramı" },
-  { start: "2033-12-22", end: "2033-12-25", name: "Ramazan Bayramı" },
-  // 2034
-  { start: "2034-02-28", end: "2034-03-04", name: "Kurban Bayramı" },
-  { start: "2034-12-11", end: "2034-12-14", name: "Ramazan Bayramı" },
-  // 2035
-  { start: "2035-02-17", end: "2035-02-21", name: "Kurban Bayramı" },
-  { start: "2035-12-01", end: "2035-12-04", name: "Ramazan Bayramı" },
-  // 2036
-  { start: "2036-02-07", end: "2036-02-11", name: "Kurban Bayramı" },
-  { start: "2036-11-19", end: "2036-11-22", name: "Ramazan Bayramı" },
-];
-
-// --- Build the ordered holiday list -----------------------------------------
-
-function pad2(n: number): string {
-  return n < 10 ? `0${n}` : `${n}`;
-}
-
-function expandRange(range: HijriRange): Holiday[] {
-  const out: Holiday[] = [];
-  const [sy, sm, sd] = range.start.split("-").map(Number) as [number, number, number];
-  const [ey, em, ed] = range.end.split("-").map(Number) as [number, number, number];
-  const startMs = Date.UTC(sy, sm - 1, sd);
-  const endMs = Date.UTC(ey, em - 1, ed);
-  for (let t = startMs; t <= endMs; t += 86_400_000) {
-    const d = new Date(t);
-    const iso = `${d.getUTCFullYear()}-${pad2(d.getUTCMonth() + 1)}-${pad2(d.getUTCDate())}`;
-    out.push({ date: iso, name: range.name });
-  }
-  return out;
-}
-
-function buildHolidays(): ReadonlyArray<Holiday> {
-  const list: Holiday[] = [];
-  for (const year of YEARS) {
-    for (const { mmdd, name } of FIXED_HOLIDAYS) {
-      list.push({ date: `${year}-${mmdd}`, name });
-    }
-  }
-  for (const range of HIJRI_HOLIDAYS) {
-    list.push(...expandRange(range));
-  }
-  list.sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : 0));
-  return list;
-}
-
-export const TURKISH_HOLIDAYS: ReadonlyArray<Holiday> = buildHolidays();
-
-export const HOLIDAY_SET: ReadonlySet<string> = new Set(
-  TURKISH_HOLIDAYS.map((h) => h.date),
-);
+export const HOLIDAY_SET: ReadonlySet<string> = new Set(TR_HOLIDAYS);

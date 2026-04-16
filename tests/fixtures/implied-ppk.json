@@ -1,0 +1,214 @@
+{
+  "tradeDate": "2026-04-13",
+  "valueDate": "2026-04-14",
+  "meetings": [
+    {
+      "date": "2026-04-24",
+      "daysFromVd": 10,
+      "periodDays": 10,
+      "df": 0.9891160698870537,
+      "forwardRate": 0.40163481437310455,
+      "impliedRatePct": 40.16348143731045
+    },
+    {
+      "date": "2026-06-12",
+      "daysFromVd": 59,
+      "periodDays": 49,
+      "df": 0.9382169051363546,
+      "forwardRate": 0.4041142697321047,
+      "impliedRatePct": 40.41142697321047
+    },
+    {
+      "date": "2026-07-24",
+      "daysFromVd": 101,
+      "periodDays": 42,
+      "df": 0.8975959986753667,
+      "forwardRate": 0.3932894319445937,
+      "impliedRatePct": 39.32894319445937
+    },
+    {
+      "date": "2026-09-11",
+      "daysFromVd": 150,
+      "periodDays": 49,
+      "df": 0.8540698905978986,
+      "forwardRate": 0.37962360498877024,
+      "impliedRatePct": 37.962360498877025
+    },
+    {
+      "date": "2026-10-23",
+      "daysFromVd": 192,
+      "periodDays": 42,
+      "df": 0.8188158703035239,
+      "forwardRate": 0.37416742285815646,
+      "impliedRatePct": 37.416742285815644
+    },
+    {
+      "date": "2026-12-11",
+      "daysFromVd": 241,
+      "periodDays": 49,
+      "df": 0.7810306726950519,
+      "forwardRate": 0.36037146260569514,
+      "impliedRatePct": 36.037146260569514
+    },
+    {
+      "date": "2027-01-22",
+      "daysFromVd": 283,
+      "periodDays": 42,
+      "df": 0.7503363675580267,
+      "forwardRate": 0.3555047302913774,
+      "impliedRatePct": 35.55047302913774
+    },
+    {
+      "date": "2027-03-18",
+      "daysFromVd": 338,
+      "periodDays": 55,
+      "df": 0.7135556688778003,
+      "forwardRate": 0.34207575090164954,
+      "impliedRatePct": 34.20757509016495
+    },
+    {
+      "date": "2027-04-26",
+      "daysFromVd": 377,
+      "periodDays": 39,
+      "df": 0.688676304717011,
+      "forwardRate": 0.3381056232856645,
+      "impliedRatePct": 33.81056232856645
+    },
+    {
+      "date": "2027-06-11",
+      "daysFromVd": 423,
+      "periodDays": 46,
+      "df": 0.6607080963749519,
+      "forwardRate": 0.3358845674308305,
+      "impliedRatePct": 33.58845674308305
+    },
+    {
+      "date": "2027-07-23",
+      "daysFromVd": 465,
+      "periodDays": 42,
+      "df": 0.6364014706335156,
+      "forwardRate": 0.3319227909176411,
+      "impliedRatePct": 33.19227909176411
+    },
+    {
+      "date": "2027-09-03",
+      "daysFromVd": 507,
+      "periodDays": 42,
+      "df": 0.6138247238639913,
+      "forwardRate": 0.3196395854241186,
+      "impliedRatePct": 31.96395854241186
+    },
+    {
+      "date": "2027-10-15",
+      "daysFromVd": 549,
+      "periodDays": 42,
+      "df": 0.5920587519064798,
+      "forwardRate": 0.3194896797830042,
+      "impliedRatePct": 31.94896797830042
+    },
+    {
+      "date": "2027-11-26",
+      "daysFromVd": 591,
+      "periodDays": 42,
+      "df": 0.5714542726436362,
+      "forwardRate": 0.3133456954001423,
+      "impliedRatePct": 31.33456954001423
+    },
+    {
+      "date": "2028-01-07",
+      "daysFromVd": 633,
+      "periodDays": 42,
+      "df": 0.5515668583077544,
+      "forwardRate": 0.3133456954001442,
+      "impliedRatePct": 31.334569540014417
+    },
+    {
+      "date": "2028-02-18",
+      "daysFromVd": 675,
+      "periodDays": 42,
+      "df": 0.5330469555423172,
+      "forwardRate": 0.3019373290843041,
+      "impliedRatePct": 30.19373290843041
+    },
+    {
+      "date": "2028-03-31",
+      "daysFromVd": 717,
+      "periodDays": 42,
+      "df": 0.5152795376793301,
+      "forwardRate": 0.2996573910152468,
+      "impliedRatePct": 29.96573910152468
+    },
+    {
+      "date": "2028-05-12",
+      "daysFromVd": 759,
+      "periodDays": 42,
+      "df": 0.49802115094577276,
+      "forwardRate": 0.30115909476772595,
+      "impliedRatePct": 30.115909476772597
+    },
+    {
+      "date": "2028-06-23",
+      "daysFromVd": 801,
+      "periodDays": 42,
+      "df": 0.481300607355924,
+      "forwardRate": 0.30191004070755934,
+      "impliedRatePct": 30.191004070755934
+    },
+    {
+      "date": "2028-08-04",
+      "daysFromVd": 843,
+      "periodDays": 42,
+      "df": 0.4654442402816413,
+      "forwardRate": 0.2960599113722444,
+      "impliedRatePct": 29.605991137224443
+    },
+    {
+      "date": "2028-09-15",
+      "daysFromVd": 885,
+      "periodDays": 42,
+      "df": 0.45040327502350314,
+      "forwardRate": 0.2902135879247509,
+      "impliedRatePct": 29.021358792475088
+    },
+    {
+      "date": "2028-10-27",
+      "daysFromVd": 927,
+      "periodDays": 42,
+      "df": 0.43599226662256074,
+      "forwardRate": 0.28724941925990904,
+      "impliedRatePct": 28.724941925990905
+    },
+    {
+      "date": "2028-12-08",
+      "daysFromVd": 969,
+      "periodDays": 42,
+      "df": 0.42243516834949923,
+      "forwardRate": 0.27890111567726134,
+      "impliedRatePct": 27.890111567726134
+    },
+    {
+      "date": "2029-01-19",
+      "daysFromVd": 1011,
+      "periodDays": 42,
+      "df": 0.409351366764253,
+      "forwardRate": 0.27776740323669186,
+      "impliedRatePct": 27.776740323669184
+    },
+    {
+      "date": "2029-03-02",
+      "daysFromVd": 1053,
+      "periodDays": 42,
+      "df": 0.3971494348565132,
+      "forwardRate": 0.2670042795360798,
+      "impliedRatePct": 26.70042795360798
+    },
+    {
+      "date": "2029-04-13",
+      "daysFromVd": 1095,
+      "periodDays": 42,
+      "df": 0.3853112177287142,
+      "forwardRate": 0.2670042795360798,
+      "impliedRatePct": 26.70042795360798
+    }
+  ]
+}
