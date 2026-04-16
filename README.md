@@ -63,6 +63,12 @@ bloomberg/
 
 ## Usage
 
+Easiest: double-click **`run.bat`** (Windows) or run **`./run.sh`**
+(macOS/Linux). The script installs dependencies on first run, starts
+the Vite dev server, and opens the app in Chrome.
+
+Manual:
+
 ```bash
 npm install
 npm run dev       # local dev server
