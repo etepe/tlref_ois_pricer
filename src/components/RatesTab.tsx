@@ -15,7 +15,7 @@
 
 import type { JSX } from "react";
 import { useMemo, useState } from "react";
-import { zeroRate } from "../core/interpolation";
+import { interpolateDF, zeroRate } from "../core/interpolation";
 import type {
   DFNode,
   ImpliedPPK,
@@ -173,24 +173,54 @@ function MarketDataBlock({
             color: C.ois,
             fontWeight: 600,
             marginBottom: "6px",
+            display: "flex",
+            alignItems: "center",
+            gap: "8px",
           }}
         >
-          Onshore OIS (TYSO · Act/365)
+          <span>Onshore OIS (TYSO · Act/365)</span>
+          <span
+            style={{
+              fontSize: "9.5px",
+              fontWeight: 700,
+              letterSpacing: "0.5px",
+              color: C.bl,
+              background: `${C.bl}22`,
+              border: `1px solid ${C.bl}44`,
+              padding: "1px 6px",
+              borderRadius: "3px",
+              textTransform: "uppercase",
+            }}
+          >
+            curve: {side}
+          </span>
         </div>
         <table style={{ borderCollapse: "collapse", width: "100%" }}>
           <thead>
             <tr>
-              {["Tenor", "Bid", "Ask", "Used"].map((h) => (
-                <th
-                  key={h}
-                  style={{
-                    ...tableHeader,
-                    textAlign: h === "Tenor" ? "left" : "right",
-                  }}
-                >
-                  {h}
-                </th>
-              ))}
+              {(
+                [
+                  ["Tenor", undefined],
+                  ["Bid", "bid"],
+                  ["Ask", "ask"],
+                  ["Used", undefined],
+                ] as ReadonlyArray<[string, QuoteSide | undefined]>
+              ).map(([h, col]) => {
+                const active = col !== undefined && side === col;
+                return (
+                  <th
+                    key={h}
+                    style={{
+                      ...tableHeader,
+                      textAlign: h === "Tenor" ? "left" : "right",
+                      background: active ? `${C.bl}22` : tableHeader.background,
+                      color: active ? C.bl : tableHeader.color,
+                    }}
+                  >
+                    {h}
+                  </th>
+                );
+              })}
             </tr>
           </thead>
           <tbody>
@@ -201,6 +231,16 @@ function MarketDataBlock({
                   : side === "ask"
                     ? q.ask
                     : (q.bid + q.ask) / 2;
+              const bidCell = {
+                ...tableCell,
+                textAlign: "right" as const,
+                background: side === "bid" ? `${C.bl}14` : undefined,
+              };
+              const askCell = {
+                ...tableCell,
+                textAlign: "right" as const,
+                background: side === "ask" ? `${C.bl}14` : undefined,
+              };
               return (
                 <tr
                   key={q.tenor}
@@ -209,13 +249,13 @@ function MarketDataBlock({
                   }}
                 >
                   <td style={{ ...tableCell, fontWeight: 600 }}>{q.tenor}</td>
-                  <td style={{ ...tableCell, textAlign: "right" }}>
+                  <td style={bidCell}>
                     <RateInput
                       value={q.bid}
                       onChange={(v) => onOisChange(i, "bid", v)}
                     />
                   </td>
-                  <td style={{ ...tableCell, textAlign: "right" }}>
+                  <td style={askCell}>
                     <RateInput
                       value={q.ask}
                       onChange={(v) => onOisChange(i, "ask", v)}
@@ -349,17 +389,20 @@ function CurvesBlock({
     const offP = offNodes
       .filter((n) => n.days > 0 && n.days <= 1600)
       .map((n) => ({ x: n.days, y: zeroRate(offNodes, n.days, 360) }));
+    // Basis: compare the two discount factors at each OIS node.
+    // Offshore DF is interpolated onto the OIS day grid so both sides
+    // are evaluated at the same maturity.
     const b = oisNodes
       .filter((n) => n.days >= 7 && n.days <= 1600)
       .map((n) => {
-        const o = zeroRate(oisNodes, n.days, 365);
-        const x = zeroRate(offNodes, n.days, 360);
+        const oisDf = n.df;
+        const offDf = interpolateDF(offNodes, n.days);
         return {
           days: n.days,
           tenor: n.tenor,
-          ois: o,
-          off: x,
-          basis: (x - o) * 100,
+          oisDf,
+          offDf,
+          dfDiff: offDf - oisDf,
         };
       });
     return { oisPts: oisP, offPts: offP, basis: b };
@@ -387,17 +430,16 @@ function CurvesBlock({
         </div>
         <div style={{ flex: "1 1 300px", minWidth: "270px" }}>
           <Chart
-            title="Offshore − OIS Basis (bp)"
-            yLabel="bp"
-            ySuffix=" bp"
+            title="Offshore − OIS ΔDF"
+            yLabel="ΔDF"
             lines={[
               {
-                pts: basis.map((b) => ({ x: b.days, y: b.basis })),
+                pts: basis.map((b) => ({ x: b.days, y: b.dfDiff })),
                 color: C.off,
-                label: "Basis",
+                label: "ΔDF",
               },
             ]}
-            dots={basis.map((b) => ({ x: b.days, y: b.basis, color: C.off }))}
+            dots={basis.map((b) => ({ x: b.days, y: b.dfDiff, color: C.off }))}
             zeroLine
           />
         </div>
@@ -407,19 +449,17 @@ function CurvesBlock({
         <table style={{ borderCollapse: "collapse", width: "100%" }}>
           <thead>
             <tr>
-              {["Tenor", "Days", "OIS (365)", "Offshore (360)", "Basis"].map(
-                (h) => (
-                  <th
-                    key={h}
-                    style={{
-                      ...tableHeader,
-                      textAlign: h === "Tenor" ? "left" : "right",
-                    }}
-                  >
-                    {h}
-                  </th>
-                ),
-              )}
+              {["Tenor", "Days", "OIS DF", "Offshore DF", "ΔDF"].map((h) => (
+                <th
+                  key={h}
+                  style={{
+                    ...tableHeader,
+                    textAlign: h === "Tenor" ? "left" : "right",
+                  }}
+                >
+                  {h}
+                </th>
+              ))}
             </tr>
           </thead>
           <tbody>
@@ -445,7 +485,7 @@ function CurvesBlock({
                     color: C.ois,
                   }}
                 >
-                  {b.ois.toFixed(2)}%
+                  {b.oisDf.toFixed(5)}
                 </td>
                 <td
                   style={{
@@ -454,12 +494,17 @@ function CurvesBlock({
                     color: C.off,
                   }}
                 >
-                  {b.off.toFixed(2)}%
+                  {b.offDf.toFixed(5)}
                 </td>
                 <td style={{ ...tableCell, textAlign: "right" }}>
-                  <span style={{ color: C.off, fontWeight: 600 }}>
-                    {b.basis > 0 ? "+" : ""}
-                    {b.basis.toFixed(0)} bp
+                  <span
+                    style={{
+                      color: b.dfDiff >= 0 ? C.off : C.ois,
+                      fontWeight: 600,
+                    }}
+                  >
+                    {b.dfDiff >= 0 ? "+" : ""}
+                    {b.dfDiff.toFixed(5)}
                   </span>
                 </td>
               </tr>
