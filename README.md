@@ -34,9 +34,7 @@ src/
 │   ├── Header.tsx        Trade/VD readout + bid/mid/ask toggle
 │   ├── Tabs.tsx
 │   ├── BondsTab.tsx
-│   ├── CurvesTab.tsx
-│   ├── PpkTab.tsx        Implied + Scenario sub-tabs
-│   ├── MarketDataTab.tsx
+│   ├── RatesTab.tsx      Market Data + Curves & Basis + Implied PPK
 │   ├── Chart.tsx         Minimal SVG chart primitive
 │   └── theme.ts          Color palette
 └── main.tsx
