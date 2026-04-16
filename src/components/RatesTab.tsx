@@ -15,7 +15,7 @@
 
 import type { JSX } from "react";
 import { useMemo, useState } from "react";
-import { interpolateDF, zeroRate } from "../core/interpolation";
+import { zeroRate } from "../core/interpolation";
 import type {
   DFNode,
   ImpliedPPK,
@@ -389,20 +389,21 @@ function CurvesBlock({
     const offP = offNodes
       .filter((n) => n.days > 0 && n.days <= 1600)
       .map((n) => ({ x: n.days, y: zeroRate(offNodes, n.days, 360) }));
-    // Basis: compare the two discount factors at each OIS node.
-    // Offshore DF is interpolated onto the OIS day grid so both sides
-    // are evaluated at the same maturity.
+    // Basis: compare the DF-derived zero-coupon returns at each OIS
+    // node. OIS is quoted Act/365, offshore Act/360; both zero rates
+    // are computed from the same log-linear DF interpolation so the
+    // basis only reflects credit/FX wedge, not day-count noise.
     const b = oisNodes
       .filter((n) => n.days >= 7 && n.days <= 1600)
       .map((n) => {
-        const oisDf = n.df;
-        const offDf = interpolateDF(offNodes, n.days);
+        const o = zeroRate(oisNodes, n.days, 365);
+        const x = zeroRate(offNodes, n.days, 360);
         return {
           days: n.days,
           tenor: n.tenor,
-          oisDf,
-          offDf,
-          dfDiff: offDf - oisDf,
+          ois: o,
+          off: x,
+          basis: (x - o) * 100,
         };
       });
     return { oisPts: oisP, offPts: offP, basis: b };
@@ -430,16 +431,17 @@ function CurvesBlock({
         </div>
         <div style={{ flex: "1 1 300px", minWidth: "270px" }}>
           <Chart
-            title="Offshore − OIS ΔDF"
-            yLabel="ΔDF"
+            title="Offshore − OIS Basis (bp)"
+            yLabel="bp"
+            ySuffix=" bp"
             lines={[
               {
-                pts: basis.map((b) => ({ x: b.days, y: b.dfDiff })),
+                pts: basis.map((b) => ({ x: b.days, y: b.basis })),
                 color: C.off,
-                label: "ΔDF",
+                label: "Basis",
               },
             ]}
-            dots={basis.map((b) => ({ x: b.days, y: b.dfDiff, color: C.off }))}
+            dots={basis.map((b) => ({ x: b.days, y: b.basis, color: C.off }))}
             zeroLine
           />
         </div>
@@ -449,17 +451,19 @@ function CurvesBlock({
         <table style={{ borderCollapse: "collapse", width: "100%" }}>
           <thead>
             <tr>
-              {["Tenor", "Days", "OIS DF", "Offshore DF", "ΔDF"].map((h) => (
-                <th
-                  key={h}
-                  style={{
-                    ...tableHeader,
-                    textAlign: h === "Tenor" ? "left" : "right",
-                  }}
-                >
-                  {h}
-                </th>
-              ))}
+              {["Tenor", "Days", "OIS (365)", "Offshore (360)", "Basis"].map(
+                (h) => (
+                  <th
+                    key={h}
+                    style={{
+                      ...tableHeader,
+                      textAlign: h === "Tenor" ? "left" : "right",
+                    }}
+                  >
+                    {h}
+                  </th>
+                ),
+              )}
             </tr>
           </thead>
           <tbody>
@@ -485,7 +489,7 @@ function CurvesBlock({
                     color: C.ois,
                   }}
                 >
-                  {b.oisDf.toFixed(5)}
+                  {b.ois.toFixed(2)}%
                 </td>
                 <td
                   style={{
@@ -494,17 +498,12 @@ function CurvesBlock({
                     color: C.off,
                   }}
                 >
-                  {b.offDf.toFixed(5)}
+                  {b.off.toFixed(2)}%
                 </td>
                 <td style={{ ...tableCell, textAlign: "right" }}>
-                  <span
-                    style={{
-                      color: b.dfDiff >= 0 ? C.off : C.ois,
-                      fontWeight: 600,
-                    }}
-                  >
-                    {b.dfDiff >= 0 ? "+" : ""}
-                    {b.dfDiff.toFixed(5)}
+                  <span style={{ color: C.off, fontWeight: 600 }}>
+                    {b.basis > 0 ? "+" : ""}
+                    {b.basis.toFixed(0)} bp
                   </span>
                 </td>
               </tr>
